@@ -7,7 +7,7 @@ set -e
 KEY_NAME=$1
 REPO_URL=$2
 INSTANCE_TYPE="t3.medium"
-AMI_ID="ami-0c7217cdde317cfec" # Ubuntu 22.04 LTS (us-east-1)
+AMI_ID="ami-0f5ee92e2d63afc18" # Ubuntu 22.04 LTS (ap-south-1)
 SEC_GROUP_NAME="letsplay-sg"
 
 if [ -z "$KEY_NAME" ] || [ -z "$REPO_URL" ]; then
