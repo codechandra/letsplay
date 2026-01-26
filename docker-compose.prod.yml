@@ -23,6 +23,9 @@ services:
       - VISIBILITY_SQL_TLS=true
       - VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
       - VISIBILITY_SQL_TLS_DISABLE_HOST_VERIFICATION=true
+      - POSTGRES_TLS_ENABLED=true
+      - POSTGRES_TLS_SKIP_VERIFY=true
+      - POSTGRES_TLS_CA=/etc/ssl/certs/ca-certificates.crt
       - SQL_CONNECT_ATTRIBUTES=sslmode=require
       - VISIBILITY_SQL_CONNECT_ATTRIBUTES=sslmode=require
       - SKIP_DB_CREATE=true
