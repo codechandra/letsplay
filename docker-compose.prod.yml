@@ -2,35 +2,37 @@ version: '3.8'
 
 services:
   # --- Infrastructure ---
-  # Local Databases removed in favor of AWS RDS (Decoupled Architecture)
+  # Main application uses AWS RDS (Decoupled Architecture)
+  # Temporal uses local DB for workflow metadata only
+
+  temporal-db:
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_PASSWORD=temporal
+      - POSTGRES_USER=temporal
+      - POSTGRES_DB=temporal
+    networks:
+      - letsplay-prod
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U temporal" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   temporal:
     image: temporalio/auto-setup:latest
     restart: always
+    depends_on:
+      temporal-db:
+        condition: service_healthy
     environment:
       - DB=postgres12
       - DB_PORT=5432
-      - POSTGRES_USER=letsplay
-      - POSTGRES_PWD=letsplay-secure-pass
-      - POSTGRES_SEEDS=${RDS_ENDPOINT}
-      - SQL_HOST=${RDS_ENDPOINT}
-      - VISIBILITY_SQL_HOST=${RDS_ENDPOINT}
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=temporal-db
       - DBNAME=temporal
       - VISIBILITY_DBNAME=temporal_visibility
-      - SQL_TLS=true
-      - SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
-      - SQL_TLS_DISABLE_HOST_VERIFICATION=true
-      - SQL_CONNECT_ATTRIBUTES=sslmode=require
-      - VISIBILITY_SQL_CONNECT_ATTRIBUTES=sslmode=require
-      - SKIP_DB_CREATE=true
-      - SKIP_SCHEMA_SETUP=true
-      - TEMPORAL_SQL_TLS_ENABLED=true
-      - TEMPORAL_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
-      - TEMPORAL_VISIBILITY_SQL_TLS_ENABLED=true
-      - TEMPORAL_VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
-    volumes:
-      - ./rds-ca.pem:/etc/ssl/certs/ca-certificates.crt:ro
-      - ./rds-ca.pem:/etc/ssl/cert.pem:ro
     networks:
       letsplay-prod:
         aliases:
@@ -83,4 +85,4 @@ networks:
   letsplay-prod:
     driver: bridge
 
-# Volumes for local data are no longer needed for DBs
+# Main app data on RDS, Temporal metadata local
