@@ -17,6 +17,8 @@ services:
       - POSTGRES_TLS_SKIP_VERIFY=true
       - SQL_TLS=true
       - SQL_TLS_DISABLE_HOST_VERIFICATION=true
+    volumes:
+      - ./rds-ca.pem:/etc/ssl/certs/ca-certificates.crt:ro
     networks:
       - letsplay-prod
 
@@ -44,6 +46,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=letsplay-secure-pass
       - TEMPORAL_TARGET=temporal:7233
       - JAVA_TOOL_OPTIONS="-Xmx256m"
+    volumes:
+      - ./rds-ca.pem:/app/rds-ca.pem:ro
     depends_on:
       - temporal
     networks:
