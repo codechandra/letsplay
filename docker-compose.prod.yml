@@ -22,6 +22,7 @@ services:
       - POSTGRES_SSLMODE=require
       - SQL_TLS=true
       - SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
+      - SQL_TLS_CA_PATH=/etc/ssl/certs/ca-certificates.crt
       - SQL_TLS_DISABLE_HOST_VERIFICATION=true
       - VISIBILITY_SQL_TLS=true
       - VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
@@ -32,6 +33,7 @@ services:
       - TEMPORAL_VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
       - SQL_CONNECT_ATTRIBUTES=sslmode=verify-ca&sslrootcert=/etc/ssl/certs/ca-certificates.crt
       - VISIBILITY_SQL_CONNECT_ATTRIBUTES=sslmode=verify-ca&sslrootcert=/etc/ssl/certs/ca-certificates.crt
+      - SKIP_DB_CREATE=true
     volumes:
       - ./rds-ca.pem:/etc/ssl/certs/ca-certificates.crt:ro
       - ./rds-ca.pem:/etc/ssl/cert.pem:ro
