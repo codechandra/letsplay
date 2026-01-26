@@ -25,14 +25,7 @@ services:
     networks:
       - letsplay-prod
 
-  elasticsearch:
-    image: elasticsearch:7.16.2
-    restart: always
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    networks:
-      - letsplay-prod
+  # Removed Elasticsearch to save RAM (Temporal works with Standard Visibility)
 
   temporal:
     image: temporalio/auto-setup:latest
@@ -43,11 +36,11 @@ services:
       - POSTGRES_USER=temporal
       - POSTGRES_PWD=temporal
       - POSTGRES_SEEDS=temporal-db
-      - ES_SEEDS=elasticsearch
-      - ES_VERSION=v7
+      # - ES_SEEDS=elasticsearch (Removed)
+      # - ES_VERSION=v7 (Removed)
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
     depends_on:
       - temporal-db
-      - elasticsearch
     networks:
       - letsplay-prod
 
@@ -74,6 +67,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=letsplay
       - SPRING_DATASOURCE_PASSWORD=letsplay
       - TEMPORAL_TARGET=temporal:7233
+      # Limit Java Heap to 256MB to fit in t2.micro
+      - JAVA_TOOL_OPTIONS="-Xmx256m"
     depends_on:
       - postgres
       - temporal

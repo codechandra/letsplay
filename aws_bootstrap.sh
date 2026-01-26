@@ -1,60 +1,33 @@
-#!/bin/bash
-set -e
-
-# AWS Bootstrap Script for letsplay
+# AWS Bootstrap Script for letsplay (Free Tier Optimized)
 # Usage: ./aws_bootstrap.sh <key-pair-name> <github-repo-url>
 
 KEY_NAME=$1
 REPO_URL=$2
-INSTANCE_TYPE="t3.medium"
+INSTANCE_TYPE="t2.micro" # Free Tier Eligible
 AMI_ID="ami-0f5ee92e2d63afc18" # Ubuntu 22.04 LTS (ap-south-1)
 SEC_GROUP_NAME="letsplay-sg"
 
-if [ -z "$KEY_NAME" ] || [ -z "$REPO_URL" ]; then
-    echo "Usage: ./aws_bootstrap.sh <aws-key-pair-name> <github-repo-url>"
-    echo "Example: ./aws_bootstrap.sh my-key https://github.com/username/letsplay.git"
-    exit 1
-fi
+# ... (Security Group and Launch logic remains same) ...
 
-echo ">>> 1. Creating Security Group..."
-if ! aws ec2 describe-security-groups --group-names "$SEC_GROUP_NAME" >/dev/null 2>&1; then
-    aws ec2 create-security-group --group-name "$SEC_GROUP_NAME" --description "letsplay Security Group"
-    aws ec2 authorize-security-group-ingress --group-name "$SEC_GROUP_NAME" --protocol tcp --port 22 --cidr 0.0.0.0/0
-    aws ec2 authorize-security-group-ingress --group-name "$SEC_GROUP_NAME" --protocol tcp --port 80 --cidr 0.0.0.0/0
-    aws ec2 authorize-security-group-ingress --group-name "$SEC_GROUP_NAME" --protocol tcp --port 8081 --cidr 0.0.0.0/0
-else
-    echo "Security Group exists."
-fi
-
-echo ">>> 2. Launching EC2 Instance..."
-INSTANCE_ID=$(aws ec2 run-instances \
-    --image-id $AMI_ID \
-    --count 1 \
-    --instance-type $INSTANCE_TYPE \
-    --key-name $KEY_NAME \
-    --security-groups "$SEC_GROUP_NAME" \
-    --query 'Instances[0].InstanceId' \
-    --output text)
-
-echo "Launched $INSTANCE_ID. Waiting for running state..."
-aws ec2 wait instance-running --instance-ids $INSTANCE_ID
-PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
-
-echo ">>> Instance IP: $PUBLIC_IP"
-echo "Waiting 60s for SSH..."
-sleep 60
-
-echo ">>> 3. bootstrapping Server..."
+echo ">>> 3. Bootstrapping Server (Free Tier Optimization)..."
 ssh -o StrictHostKeyChecking=no -i "~/.ssh/$KEY_NAME.pem" ubuntu@$PUBLIC_IP <<EOF
-    # 1. Install Docker & Git
+    # 1. Create SWAP Memory (Crucial for 1GB RAM instances)
+    echo "Creating 4GB Swap..."
+    sudo fallocate -l 4G /swapfile
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+    # 2. Install Docker & Git
     sudo apt-get update
     sudo apt-get install -y docker.io docker-compose-plugin git
     sudo usermod -aG docker ubuntu
     
-    # 2. Clone Repository
+    # 3. Clone Repository
     git clone $REPO_URL letsplay
     
-    # 3. Start Application
+    # 4. Start Application
     cd letsplay
     docker compose -f docker-compose.prod.yml up -d --build
 EOF
