@@ -6,6 +6,8 @@ import VenuesPage from './pages/VenuesPage';
 import LoginPage from './pages/Auth/LoginPage';
 import SignupPage from './pages/Auth/SignupPage';
 import CheckoutPage from './pages/CheckoutPage';
+import MyBookingsPage from './pages/MyBookingsPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import DashboardLayout from './layout/DashboardLayout';
 import PlayerDashboard from './pages/Dashboard/PlayerDashboard';
 import OwnerDashboard from './pages/Dashboard/OwnerDashboard';
@@ -18,8 +20,9 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/venues" element={<VenuesPage />} />
-        <Route path="/booking/:id" element={<BookingPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/booking/:id" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
+        <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+        <Route path="/my-bookings" element={<ProtectedRoute><MyBookingsPage /></ProtectedRoute>} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<SignupPage />} />
 

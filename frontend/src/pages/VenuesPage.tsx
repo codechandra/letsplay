@@ -1,234 +1,251 @@
 import { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../utils/apiConfig';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { MapPin, Search, Filter, Users, Calendar, ArrowRight } from 'lucide-react';
+import { API_BASE_URL } from '../utils/apiConfig';
 import { Button } from '../components/ui/Button';
-import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, Search, Filter, IndianRupee, Star, Loader2 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 interface Ground {
     id: number;
-    name: String;
-    location: String;
-    sportType: String;
+    name: string;
+    location: string;
+    sportType: string;
+    description: string;
     pricePerHour: number;
-    imageUrl: String;
+    imageUrl: string;
 }
 
+const SPORT_TYPES = ['All', 'Football', 'Cricket', 'Badminton', 'Tennis', 'Basketball', 'Multi-Sport'];
+const PRICE_RANGES = [
+    { label: 'All Prices', min: 0, max: Infinity },
+    { label: 'Under ₹1000', min: 0, max: 1000 },
+    { label: '₹1000 - ₹2000', min: 1000, max: 2000 },
+    { label: 'Above ₹2000', min: 2000, max: Infinity }
+];
+
 export default function VenuesPage() {
-    const [grounds, setGrounds] = useState<Ground[]>([]);
-    const [publicBookings, setPublicBookings] = useState<any[]>([]);
-    const [viewMode, setViewMode] = useState<'venues' | 'social'>('venues');
-    const [loading, setLoading] = useState(true);
-    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const categoryQuery = searchParams.get('category');
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                if (viewMode === 'venues') {
-                    const url = categoryQuery
-                        ? `${API_BASE_URL}/grounds?sportType=${categoryQuery}`
-                        : `${API_BASE_URL}/grounds`;
-                    const res = await fetch(url);
-                    setGrounds(await res.json());
-                } else {
-                    const res = await fetch(`${API_BASE_URL}/bookings/public`);
-                    setPublicBookings(await res.json());
-                }
-            } catch (err) {
-                console.error('Failed to fetch data', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [categoryQuery, viewMode]);
+    const [grounds, setGrounds] = useState<Ground[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedSport, setSelectedSport] = useState(categoryQuery || 'All');
+    const [selectedPriceRange, setSelectedPriceRange] = useState(0);
+    const [showFilters, setShowFilters] = useState(false);
 
-    const handleJoin = async (bookingId: number) => {
-        try {
-            const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}/join?userId=1`, {
-                method: 'POST'
+    useEffect(() => {
+        const url = categoryQuery
+            ? `${API_BASE_URL}/grounds?sportType=${categoryQuery}`
+            : `${API_BASE_URL}/grounds`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                setGrounds(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
             });
-            if (res.ok) {
-                // Refresh data
-                const updatedRes = await fetch(`${API_BASE_URL}/bookings/public`);
-                setPublicBookings(await updatedRes.json());
-                alert("Joined the game! See you on the field.");
-            }
-        } catch (err) {
-            console.error('Failed to join', err);
-        }
-    };
+    }, [categoryQuery]);
+
+    // Filter grounds
+    const filteredGrounds = grounds.filter(ground => {
+        const matchesSearch = ground.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            ground.location.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSport = selectedSport === 'All' || ground.sportType === selectedSport;
+        const priceRange = PRICE_RANGES[selectedPriceRange];
+        const matchesPrice = ground.pricePerHour >= priceRange.min && ground.pricePerHour <= priceRange.max;
+
+        return matchesSearch && matchesSport && matchesPrice;
+    });
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="w-12 h-12 text-letsplay-blue animate-spin" />
+            </div>
+        );
+    }
 
     return (
-        <div className="container mx-auto px-4 py-12">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
-                <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-                        {viewMode === 'venues' ? 'Explore Venues' : 'Join a Game'}
+        <div className="min-h-screen bg-slate-50">
+            {/* Hero Section - Responsive */}
+            <div className="bg-gradient-to-br from-letsplay-blue to-blue-700 text-white">
+                <div className="container mx-auto px-4 py-8 lg:py-16">
+                    <h1 className="text-3xl lg:text-5xl font-black mb-3 lg:mb-4">
+                        Find Your Perfect Venue
                     </h1>
-                    <p className="text-slate-500 mt-1 font-medium">
-                        {viewMode === 'venues' ? 'Find the perfect spot for your next game' : 'Connect with other players and split the cost'}
+                    <p className="text-blue-100 text-base lg:text-xl mb-6 lg:mb-8">
+                        Book premium sports facilities across India
                     </p>
-                </div>
 
-                <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl">
-                    <button
-                        onClick={() => setViewMode('venues')}
-                        className={cn(
-                            "px-6 py-2.5 rounded-xl text-sm font-black transition-all",
-                            viewMode === 'venues' ? "bg-white text-letsplay-blue shadow-lg shadow-slate-200" : "text-slate-500 hover:text-slate-900"
-                        )}
-                    >
-                        Book Venue
-                    </button>
-                    <button
-                        onClick={() => setViewMode('social')}
-                        className={cn(
-                            "px-6 py-2.5 rounded-xl text-sm font-black transition-all",
-                            viewMode === 'social' ? "bg-white text-letsplay-blue shadow-lg shadow-slate-200" : "text-slate-500 hover:text-slate-900"
-                        )}
-                    >
-                        Find Games
-                    </button>
-                </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
-                <div className="flex items-center gap-3 flex-1">
-                    <div className="relative flex-1 max-w-lg">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Search venues..."
-                            className="pl-10 pr-4 h-11 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-letsplay-blue/10 focus:border-letsplay-blue w-full md:w-64"
-                        />
+                    {/* Search Bar - Responsive */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Search by venue name or location..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 lg:py-4 rounded-xl text-slate-900 text-base lg:text-lg focus:outline-none focus:ring-2 focus:ring-white/50"
+                            />
+                        </div>
+                        <Button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="sm:w-auto bg-white/20 hover:bg-white/30 backdrop-blur-sm border-2 border-white/30"
+                        >
+                            <Filter className="w-5 h-5 mr-2" />
+                            Filters
+                        </Button>
                     </div>
-                    <Button variant="outline" className="h-11 border-slate-200">
-                        <Filter className="w-4 h-4 mr-2" /> Filter
-                    </Button>
                 </div>
             </div>
 
-            {loading ? (
-                <div className="flex justify-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-letsplay-blue"></div>
-                </div>
-            ) : (
-                <AnimatePresence mode="wait">
-                    {viewMode === 'venues' ? (
-                        <motion.div
-                            key="venues-grid"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                        >
-                            {grounds.map((ground, index) => (
-                                <motion.div
-                                    key={ground.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
-                                    className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 group cursor-pointer"
-                                    onClick={() => navigate(`/booking/${ground.id}`)}
-                                >
-                                    <div className="aspect-[4/3] overflow-hidden relative">
-                                        <img
-                                            src={ground.imageUrl as string}
-                                            alt={ground.name as string}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
-                                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-letsplay-blue shadow-sm">
-                                            {ground.sportType}
-                                        </div>
-                                    </div>
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-bold text-slate-900 mb-1 group-hover:text-letsplay-blue transition-colors">{ground.name}</h3>
-                                        <p className="flex items-center text-slate-500 text-sm mb-4">
-                                            <MapPin className="w-4 h-4 mr-1" /> {ground.location}
-                                        </p>
-                                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                                            <div className="text-letsplay-blue font-bold text-lg">
-                                                ₹{ground.pricePerHour}<span className="text-slate-400 text-sm font-normal"> / hour</span>
-                                            </div>
-                                            <Button size="sm" className="rounded-lg">Book Now</Button>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="social-feed"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="space-y-6 max-w-4xl mx-auto"
-                        >
-                            {publicBookings.length === 0 ? (
-                                <div className="text-center py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                                    <Users className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                                    <p className="text-slate-500 font-bold">No public games found yet.</p>
-                                    <Button variant="ghost" className="mt-2" onClick={() => setViewMode('venues')}>Be the first to host!</Button>
-                                </div>
-                            ) : (
-                                publicBookings.map((booking, index) => (
-                                    <motion.div
-                                        key={booking.id}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row items-center gap-6"
+            <div className="container mx-auto px-4 py-6 lg:py-8">
+                {/* Filters Section - Collapsible on mobile */}
+                {showFilters && (
+                    <div className="bg-white rounded-xl p-4 lg:p-6 mb-6 shadow-sm">
+                        {/* Sport Type Filter */}
+                        <div className="mb-6">
+                            <h3 className="font-bold text-slate-900 mb-3 text-sm lg:text-base">Sport Type</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {SPORT_TYPES.map(sport => (
+                                    <button
+                                        key={sport}
+                                        onClick={() => setSelectedSport(sport)}
+                                        className={cn(
+                                            "px-3 lg:px-4 py-2 rounded-lg font-semibold text-sm lg:text-base transition-all",
+                                            selectedSport === sport
+                                                ? "bg-letsplay-blue text-white"
+                                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        )}
                                     >
-                                        <div className="h-24 w-24 rounded-2xl overflow-hidden flex-shrink-0">
-                                            <img src={booking.ground.imageUrl} className="h-full w-full object-cover" />
-                                        </div>
-                                        <div className="flex-1 text-center md:text-left">
-                                            <div className="flex items-center gap-2 mb-1 justify-center md:justify-start">
-                                                <span className="px-2 py-0.5 bg-letsplay-blue/10 text-letsplay-blue text-[10px] font-black uppercase rounded-md tracking-wider">
-                                                    {booking.ground.sportType}
-                                                </span>
-                                                <span className="text-xs text-slate-400 font-bold flex items-center gap-1">
-                                                    <Calendar className="w-3 h-3" /> Tomorrow, 6:00 PM
-                                                </span>
-                                            </div>
-                                            <h3 className="text-xl font-bold text-slate-900">{booking.ground.name}</h3>
-                                            <p className="text-sm text-slate-500 font-medium">Hosted by <span className="text-slate-900">{booking.user.name}</span></p>
-                                        </div>
-                                        <div className="flex items-center gap-6 pr-4">
-                                            <div className="text-center">
-                                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Players</p>
-                                                <div className="flex items-center gap-1 font-black text-slate-900">
-                                                    <Users className="w-4 h-4 text-letsplay-blue" />
-                                                    {booking.joinedPlayers}/{booking.maxPlayers}
-                                                </div>
-                                            </div>
-                                            <Button
-                                                className="h-12 px-8 rounded-2xl bg-slate-900 hover:bg-black group"
-                                                onClick={() => handleJoin(booking.id)}
-                                            >
-                                                Join <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                                            </Button>
-                                        </div>
-                                    </motion.div>
-                                ))
-                            )}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            )
-            }
+                                        {sport}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-            {!loading && grounds.length === 0 && (
-                <div className="text-center py-20">
-                    <p className="text-slate-500 text-lg">No venues found for this category.</p>
-                    <Button variant="ghost" className="mt-4" onClick={() => navigate('/venues')}>View All Venues</Button>
+                        {/* Price Range Filter */}
+                        <div>
+                            <h3 className="font-bold text-slate-900 mb-3 text-sm lg:text-base">Price Range</h3>
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                {PRICE_RANGES.map((range, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setSelectedPriceRange(idx)}
+                                        className={cn(
+                                            "px-3 lg:px-4 py-2 rounded-lg font-semibold text-sm lg:text-base transition-all",
+                                            selectedPriceRange === idx
+                                                ? "bg-letsplay-blue text-white"
+                                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        )}
+                                    >
+                                        {range.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Results Count */}
+                <div className="flex items-center justify-between mb-4 lg:mb-6">
+                    <p className="text-slate-600 text-sm lg:text-base">
+                        <span className="font-bold text-slate-900">{filteredGrounds.length}</span> venues found
+                    </p>
+                    {(searchTerm || selectedSport !== 'All' || selectedPriceRange !== 0) && (
+                        <button
+                            onClick={() => {
+                                setSearchTerm('');
+                                setSelectedSport('All');
+                                setSelectedPriceRange(0);
+                            }}
+                            className="text-sm text-letsplay-blue font-semibold hover:underline"
+                        >
+                            Clear filters
+                        </button>
+                    )}
                 </div>
-            )}
+
+                {/* Venues Grid - Responsive */}
+                {filteredGrounds.length === 0 ? (
+                    <div className="bg-white rounded-2xl p-12 lg:p-20 text-center">
+                        <h3 className="text-xl lg:text-2xl font-bold text-slate-900 mb-2">
+                            No venues found
+                        </h3>
+                        <p className="text-slate-500 mb-6">
+                            Try adjusting your filters or search terms
+                        </p>
+                        <Button onClick={() => {
+                            setSearchTerm('');
+                            setSelectedSport('All');
+                            setSelectedPriceRange(0);
+                        }}>
+                            Clear All Filters
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+                        {filteredGrounds.map((ground) => (
+                            <div
+                                key={ground.id}
+                                className="bg-white rounded-xl lg:rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer group"
+                                onClick={() => navigate(`/booking/${ground.id}`)}
+                            >
+                                {/* Image */}
+                                <div className="aspect-video overflow-hidden relative">
+                                    <img
+                                        src={ground.imageUrl}
+                                        alt={ground.name}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    />
+                                    <div className="absolute top-3 left-3">
+                                        <span className="px-3 py-1 bg-white/95 backdrop-blur-sm rounded-lg text-xs lg:text-sm font-bold text-letsplay-blue">
+                                            {ground.sportType}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-4 lg:p-5">
+                                    <h3 className="font-bold text-slate-900 mb-2 text-base lg:text-lg line-clamp-1 group-hover:text-letsplay-blue transition-colors">
+                                        {ground.name}
+                                    </h3>
+
+                                    <p className="text-sm text-slate-500 mb-3 flex items-start">
+                                        <MapPin className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" />
+                                        <span className="line-clamp-1">{ground.location}</span>
+                                    </p>
+
+                                    <p className="text-xs lg:text-sm text-slate-600 mb-4 line-clamp-2 leading-relaxed">
+                                        {ground.description}
+                                    </p>
+
+                                    <div className="flex items-center justify-between pt-4 border-t">
+                                        <div>
+                                            <p className="text-xs text-slate-400 mb-0.5">Starting from</p>
+                                            <div className="flex items-center text-xl lg:text-2xl font-bold text-letsplay-blue">
+                                                <IndianRupee className="w-4 h-4 lg:w-5 lg:h-5" />
+                                                {ground.pricePerHour}
+                                                <span className="text-xs lg:text-sm text-slate-400 font-normal ml-1">/hr</span>
+                                            </div>
+                                        </div>
+                                        <Button size="sm" className="group-hover:bg-letsplay-blue group-hover:text-white">
+                                            Book Now
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
