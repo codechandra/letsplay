@@ -17,22 +17,24 @@ services:
       - VISIBILITY_SQL_HOST=${RDS_ENDPOINT}
       - DBNAME=temporal
       - VISIBILITY_DBNAME=temporal_visibility
-      - TEMPORAL_SQL_TLS_ENABLED=true
-      - TEMPORAL_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
-      - TEMPORAL_SQL_TLS_DISABLE_HOST_VERIFICATION=true
-      - TEMPORAL_VISIBILITY_SQL_TLS_ENABLED=true
-      - TEMPORAL_VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
-      - TEMPORAL_VISIBILITY_SQL_TLS_DISABLE_HOST_VERIFICATION=true
+      - SQL_TLS=true
+      - SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
+      - SQL_TLS_DISABLE_HOST_VERIFICATION=true
       - SQL_CONNECT_ATTRIBUTES=sslmode=require
       - VISIBILITY_SQL_CONNECT_ATTRIBUTES=sslmode=require
       - SKIP_DB_CREATE=true
       - SKIP_SCHEMA_SETUP=true
-      - SKIP_POSTGRES_DB_SETUP=true
+      - TEMPORAL_SQL_TLS_ENABLED=true
+      - TEMPORAL_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
+      - TEMPORAL_VISIBILITY_SQL_TLS_ENABLED=true
+      - TEMPORAL_VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
     volumes:
       - ./rds-ca.pem:/etc/ssl/certs/ca-certificates.crt:ro
       - ./rds-ca.pem:/etc/ssl/cert.pem:ro
     networks:
-      - letsplay-prod
+      letsplay-prod:
+        aliases:
+          - temporal
 
   temporal-ui:
     image: temporalio/ui:latest
