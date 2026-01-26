@@ -17,7 +17,11 @@ services:
       - POSTGRES_TLS_SKIP_VERIFY=true
       - POSTGRES_SSLMODE=require
       - SQL_TLS=true
+      - SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
       - SQL_TLS_DISABLE_HOST_VERIFICATION=true
+      - VISIBILITY_SQL_TLS=true
+      - VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
+      - VISIBILITY_SQL_TLS_DISABLE_HOST_VERIFICATION=true
     volumes:
       - ./rds-ca.pem:/etc/ssl/certs/ca-certificates.crt:ro
       - ./rds-ca.pem:/etc/ssl/cert.pem:ro
@@ -43,7 +47,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${RDS_ENDPOINT}:5432/letsplay?sslmode=require
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${RDS_ENDPOINT}:5432/letsplay?sslmode=verify-ca&sslrootcert=/app/rds-ca.pem
       - SPRING_DATASOURCE_USERNAME=letsplay
       - SPRING_DATASOURCE_PASSWORD=letsplay-secure-pass
       - TEMPORAL_TARGET=temporal:7233
