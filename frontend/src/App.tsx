@@ -10,6 +10,8 @@ import MyBookingsPage from './pages/MyBookingsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import DashboardLayout from './layout/DashboardLayout';
 import PlayerDashboard from './pages/Dashboard/PlayerDashboard';
+import PlayerBookingsPage from './pages/Dashboard/PlayerBookingsPage';
+import PlayerTeamsPage from './pages/Dashboard/PlayerTeamsPage';
 import OwnerDashboard from './pages/Dashboard/OwnerDashboard';
 import CoachDashboard from './pages/Dashboard/CoachDashboard';
 import { useEffect } from 'react';
@@ -29,6 +31,8 @@ function App() {
         {/* Dashboards */}
         <Route path="/dashboard" element={<DashboardRedirect />} />
         <Route path="/dashboard/player" element={<DashboardLayout role="PLAYER"><PlayerDashboard /></DashboardLayout>} />
+        <Route path="/dashboard/player/bookings" element={<DashboardLayout role="PLAYER"><PlayerBookingsPage /></DashboardLayout>} />
+        <Route path="/dashboard/player/teams" element={<DashboardLayout role="PLAYER"><PlayerTeamsPage /></DashboardLayout>} />
         <Route path="/dashboard/owner" element={<DashboardLayout role="OWNER"><OwnerDashboard /></DashboardLayout>} />
         <Route path="/dashboard/coach" element={<DashboardLayout role="COACH"><CoachDashboard /></DashboardLayout>} />
 
