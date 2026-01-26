@@ -12,7 +12,7 @@ services:
       - DB_PORT=5432
       - POSTGRES_USER=letsplay
       - POSTGRES_PWD=letsplay-secure-pass
-      - POSTGRES_SEEDS=${RDS_ENDPOINT}?sslmode=require
+      - POSTGRES_SEEDS=${RDS_ENDPOINT}
       - SQL_HOST=${RDS_ENDPOINT}
       - VISIBILITY_SQL_HOST=${RDS_ENDPOINT}
       - DBNAME=temporal
