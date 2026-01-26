@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { API_BASE_URL } from '../../utils/apiConfig';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { motion } from 'framer-motion';
@@ -16,7 +17,7 @@ export default function LoginPage() {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:8082/api/auth/login', {
+            const res = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })

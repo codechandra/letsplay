@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../utils/apiConfig';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useBooking } from '../hooks/useBooking';
 import { Button } from '../components/ui/Button';
@@ -30,7 +31,7 @@ export function BookingPage() {
 
     useEffect(() => {
         if (id && !isNaN(Number(id))) {
-            fetch(`http://localhost:8082/api/grounds/${id}`)
+            fetch(`${API_BASE_URL}/grounds/${id}`)
                 .then(res => res.json())
                 .then(data => setVenue(data))
                 .catch(err => console.error(err));

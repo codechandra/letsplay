@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { API_BASE_URL } from '../utils/apiConfig';
 
 // Types (based on backend)
 export interface Booking {
@@ -22,7 +23,7 @@ export function useBooking() {
 
     const pollStatus = useCallback(async (id: number) => {
         try {
-            const res = await fetch(`http://localhost:8082/api/bookings/${id}`);
+            const res = await fetch(`${API_BASE_URL}/bookings/${id}`);
             if (!res.ok) throw new Error('Failed to fetch booking status');
 
             const data: Booking = await res.json();
@@ -49,7 +50,7 @@ export function useBooking() {
         setStatus('PENDING');
 
         try {
-            const response = await fetch('http://localhost:8082/api/bookings', {
+            const response = await fetch(`${API_BASE_URL}/bookings`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

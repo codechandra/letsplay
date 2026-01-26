@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../utils/apiConfig';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MapPin, Search, Filter, Users, Calendar, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
@@ -34,7 +35,7 @@ export default function VenuesPage() {
                     const res = await fetch(url);
                     setGrounds(await res.json());
                 } else {
-                    const res = await fetch('http://localhost:8082/api/bookings/public');
+                    const res = await fetch(`${API_BASE_URL}/bookings/public`);
                     setPublicBookings(await res.json());
                 }
             } catch (err) {
@@ -48,7 +49,7 @@ export default function VenuesPage() {
 
     const handleJoin = async (bookingId: number) => {
         try {
-            const res = await fetch(`http://localhost:8082/api/bookings/${bookingId}/join?userId=1`, {
+            const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}/join?userId=1`, {
                 method: 'POST'
             });
             if (res.ok) {
