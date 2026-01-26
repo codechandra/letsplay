@@ -2,9 +2,9 @@ spring:
   application:
     name: letsplay-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/letsplay
-    username: letsplay
-    password: letsplay
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/letsplay}
+    username: ${SPRING_DATASOURCE_USERNAME:letsplay}
+    password: ${SPRING_DATASOURCE_PASSWORD:letsplay}
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,4 +17,4 @@ server:
   port: 8082
 
 temporal:
-  target: 127.0.0.1:7233
+  target: ${TEMPORAL_TARGET:127.0.0.1:7233}

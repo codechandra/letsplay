@@ -2,30 +2,7 @@ version: '3.8'
 
 services:
   # --- Infrastructure ---
-  postgres:
-    image: postgres:15
-    restart: always
-    environment:
-      - POSTGRES_USER=letsplay
-      - POSTGRES_PASSWORD=letsplay
-      - POSTGRES_DB=letsplay
-    volumes:
-      - postgres_prod_data:/var/lib/postgresql/data
-    networks:
-      - letsplay-prod
-
-  temporal-db:
-    image: postgres:15
-    restart: always
-    environment:
-      - POSTGRES_USER=temporal
-      - POSTGRES_PASSWORD=temporal
-    volumes:
-      - temporal_prod_data:/var/lib/postgresql/data
-    networks:
-      - letsplay-prod
-
-  # Removed Elasticsearch to save RAM (Temporal works with Standard Visibility)
+  # Local Databases removed in favor of AWS RDS (Decoupled Architecture)
 
   temporal:
     image: temporalio/auto-setup:latest
@@ -33,14 +10,9 @@ services:
     environment:
       - DB=postgres12
       - DB_PORT=5432
-      - POSTGRES_USER=temporal
-      - POSTGRES_PWD=temporal
-      - POSTGRES_SEEDS=temporal-db
-      # - ES_SEEDS=elasticsearch (Removed)
-      # - ES_VERSION=v7 (Removed)
-      # - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
-    depends_on:
-      - temporal-db
+      - POSTGRES_USER=letsplay
+      - POSTGRES_PWD=letsplay-secure-pass
+      - POSTGRES_SEEDS=${RDS_ENDPOINT}
     networks:
       - letsplay-prod
 
@@ -50,7 +22,7 @@ services:
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
     ports:
-      - "8081:8080" # Exposed on port 8081
+      - "8081:8080"
     depends_on:
       - temporal
     networks:
@@ -63,14 +35,12 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/letsplay
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${RDS_ENDPOINT}:5432/letsplay
       - SPRING_DATASOURCE_USERNAME=letsplay
-      - SPRING_DATASOURCE_PASSWORD=letsplay
+      - SPRING_DATASOURCE_PASSWORD=letsplay-secure-pass
       - TEMPORAL_TARGET=temporal:7233
-      # Limit Java Heap to 256MB to fit in t2.micro
       - JAVA_TOOL_OPTIONS="-Xmx256m"
     depends_on:
-      - postgres
       - temporal
     networks:
       - letsplay-prod
@@ -81,7 +51,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "80:80" # Exposed on standard HTTP port
+      - "80:80"
     depends_on:
       - backend
     networks:
@@ -91,6 +61,4 @@ networks:
   letsplay-prod:
     driver: bridge
 
-volumes:
-  postgres_prod_data:
-  temporal_prod_data:
+# Volumes for local data are no longer needed for DBs
