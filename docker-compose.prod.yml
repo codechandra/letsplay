@@ -15,6 +15,7 @@ services:
       - POSTGRES_SEEDS=${RDS_ENDPOINT}
       - POSTGRES_TLS_ENABLED=true
       - POSTGRES_TLS_SKIP_VERIFY=true
+      - POSTGRES_SSLMODE=require
       - SQL_TLS=true
       - SQL_TLS_DISABLE_HOST_VERIFICATION=true
     volumes:
