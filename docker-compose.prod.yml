@@ -13,6 +13,8 @@ services:
       - POSTGRES_USER=letsplay
       - POSTGRES_PWD=letsplay-secure-pass
       - POSTGRES_SEEDS=${RDS_ENDPOINT}
+      - DBNAME=temporal
+      - VISIBILITY_DBNAME=temporal_visibility
       - POSTGRES_TLS_ENABLED=true
       - POSTGRES_TLS_SKIP_VERIFY=true
       - POSTGRES_SSLMODE=require
