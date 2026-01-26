@@ -14,6 +14,7 @@ services:
       - POSTGRES_PWD=letsplay-secure-pass
       - POSTGRES_SEEDS=${RDS_ENDPOINT}
       - POSTGRES_TLS_ENABLED=true
+      - POSTGRES_TLS_SKIP_VERIFY=true
       - SQL_TLS=true
       - SQL_TLS_DISABLE_HOST_VERIFICATION=true
     networks:
