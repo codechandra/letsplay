@@ -13,6 +13,8 @@ services:
       - POSTGRES_USER=letsplay
       - POSTGRES_PWD=letsplay-secure-pass
       - POSTGRES_SEEDS=${RDS_ENDPOINT}
+      - SQL_HOST=${RDS_ENDPOINT}
+      - VISIBILITY_SQL_HOST=${RDS_ENDPOINT}
       - DBNAME=temporal
       - VISIBILITY_DBNAME=temporal_visibility
       - POSTGRES_TLS_ENABLED=true
@@ -24,6 +26,10 @@ services:
       - VISIBILITY_SQL_TLS=true
       - VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
       - VISIBILITY_SQL_TLS_DISABLE_HOST_VERIFICATION=true
+      - TEMPORAL_SQL_TLS=true
+      - TEMPORAL_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
+      - TEMPORAL_VISIBILITY_SQL_TLS=true
+      - TEMPORAL_VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
     volumes:
       - ./rds-ca.pem:/etc/ssl/certs/ca-certificates.crt:ro
       - ./rds-ca.pem:/etc/ssl/cert.pem:ro
