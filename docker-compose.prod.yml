@@ -13,6 +13,9 @@ services:
       - POSTGRES_USER=letsplay
       - POSTGRES_PWD=letsplay-secure-pass
       - POSTGRES_SEEDS=${RDS_ENDPOINT}
+      - POSTGRES_TLS_ENABLED=true
+      - SQL_TLS=true
+      - SQL_TLS_DISABLE_HOST_VERIFICATION=true
     networks:
       - letsplay-prod
 
@@ -35,7 +38,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${RDS_ENDPOINT}:5432/letsplay
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${RDS_ENDPOINT}:5432/letsplay?sslmode=require
       - SPRING_DATASOURCE_USERNAME=letsplay
       - SPRING_DATASOURCE_PASSWORD=letsplay-secure-pass
       - TEMPORAL_TARGET=temporal:7233
