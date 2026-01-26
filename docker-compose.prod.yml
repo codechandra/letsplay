@@ -8,7 +8,7 @@ services:
     image: temporalio/auto-setup:latest
     restart: always
     environment:
-      - DB=postgres12
+      - DB=postgres12_pgx
       - DB_PORT=5432
       - POSTGRES_USER=letsplay
       - POSTGRES_PWD=letsplay-secure-pass
@@ -18,11 +18,9 @@ services:
       - DBNAME=temporal
       - VISIBILITY_DBNAME=temporal_visibility
       - SQL_TLS=true
-      - SQL_TLS_ENABLED=true
       - SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
       - SQL_TLS_DISABLE_HOST_VERIFICATION=true
       - VISIBILITY_SQL_TLS=true
-      - VISIBILITY_SQL_TLS_ENABLED=true
       - VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
       - VISIBILITY_SQL_TLS_DISABLE_HOST_VERIFICATION=true
       - SQL_CONNECT_ATTRIBUTES=sslmode=require
