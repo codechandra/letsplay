@@ -25,6 +25,11 @@ public class BookingController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping
+    public ResponseEntity<java.util.List<Booking>> getAllBookings() {
+        return ResponseEntity.ok(bookingService.getAllBookings());
+    }
+
     @GetMapping("/public")
     public ResponseEntity<java.util.List<Booking>> getPublicBookings() {
         return ResponseEntity.ok(bookingService.getPublicBookings());

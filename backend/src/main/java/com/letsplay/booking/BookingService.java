@@ -38,6 +38,10 @@ public class BookingService {
         return bookingRepository.findById(id);
     }
 
+    public java.util.List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
+    }
+
     public java.util.List<Booking> getPublicBookings() {
         return bookingRepository.findAll().stream()
                 .filter(b -> b.getIsPublic() && b.getStatus() == Booking.BookingStatus.CONFIRMED
