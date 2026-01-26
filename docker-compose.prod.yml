@@ -19,6 +19,7 @@ services:
       - SQL_TLS_DISABLE_HOST_VERIFICATION=true
     volumes:
       - ./rds-ca.pem:/etc/ssl/certs/ca-certificates.crt:ro
+      - ./rds-ca.pem:/etc/ssl/cert.pem:ro
     networks:
       - letsplay-prod
 
