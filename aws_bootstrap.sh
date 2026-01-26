@@ -1,10 +1,13 @@
+#!/bin/bash
+set -e
+
 # AWS Bootstrap Script for letsplay (Free Tier Optimized)
 # Usage: ./aws_bootstrap.sh <key-pair-name> <github-repo-url>
 
 KEY_NAME=$1
 REPO_URL=$2
 INSTANCE_TYPE="t2.micro" # Free Tier Eligible
-AMI_ID="ami-0f5ee92e2d63afc18" # Ubuntu 22.04 LTS (ap-south-1)
+AMI_ID="ami-0ff91eb5c6fe7cc86" # Ubuntu 22.04 LTS (ap-south-1) - Validated
 SEC_GROUP_NAME="letsplay-sg"
 
 # ... (Security Group and Launch logic remains same) ...
