@@ -30,6 +30,8 @@ services:
       - TEMPORAL_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
       - TEMPORAL_VISIBILITY_SQL_TLS=true
       - TEMPORAL_VISIBILITY_SQL_TLS_CA=/etc/ssl/certs/ca-certificates.crt
+      - SQL_CONNECT_ATTRIBUTES=sslmode=verify-ca&sslrootcert=/etc/ssl/certs/ca-certificates.crt
+      - VISIBILITY_SQL_CONNECT_ATTRIBUTES=sslmode=verify-ca&sslrootcert=/etc/ssl/certs/ca-certificates.crt
     volumes:
       - ./rds-ca.pem:/etc/ssl/certs/ca-certificates.crt:ro
       - ./rds-ca.pem:/etc/ssl/cert.pem:ro
