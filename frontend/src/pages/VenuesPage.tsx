@@ -30,8 +30,8 @@ export default function VenuesPage() {
             try {
                 if (viewMode === 'venues') {
                     const url = categoryQuery
-                        ? `http://localhost:8082/api/grounds?sportType=${categoryQuery}`
-                        : 'http://localhost:8082/api/grounds';
+                        ? `${API_BASE_URL}/grounds?sportType=${categoryQuery}`
+                        : `${API_BASE_URL}/grounds`;
                     const res = await fetch(url);
                     setGrounds(await res.json());
                 } else {
@@ -54,7 +54,7 @@ export default function VenuesPage() {
             });
             if (res.ok) {
                 // Refresh data
-                const updatedRes = await fetch('http://localhost:8082/api/bookings/public');
+                const updatedRes = await fetch(`${API_BASE_URL}/bookings/public`);
                 setPublicBookings(await updatedRes.json());
                 alert("Joined the game! See you on the field.");
             }
