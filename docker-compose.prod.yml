@@ -8,7 +8,7 @@ services:
     image: temporalio/auto-setup:latest
     restart: always
     environment:
-      - DB=postgres12_pgx
+      - DB=postgres12
       - DB_PORT=5432
       - POSTGRES_USER=letsplay
       - POSTGRES_PWD=letsplay-secure-pass
@@ -26,6 +26,9 @@ services:
       - POSTGRES_TLS_ENABLED=true
       - POSTGRES_TLS_SKIP_VERIFY=true
       - POSTGRES_TLS_CA=/etc/ssl/certs/ca-certificates.crt
+      - POSTGRES_SSLMODE=require
+      - PGSSLMODE=require
+      - PGSSLROOTCERT=/etc/ssl/certs/ca-certificates.crt
       - SQL_CONNECT_ATTRIBUTES=sslmode=require
       - VISIBILITY_SQL_CONNECT_ATTRIBUTES=sslmode=require
       - SKIP_DB_CREATE=true
