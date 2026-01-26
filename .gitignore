@@ -1,0 +1,27 @@
+# Basics
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Java/Maven
+target/
+*.class
+
+# Node/Frontend
+node_modules/
+dist/
+build/
+.env
+
+# Temporal/Docker
+infra/postgres-data/
+postgres_data/
+temporal_data/
+
+# Local Deployment scripts/configs
+aws_deploy.sh
+letsplay_connections.xml
+letsplay_dbeaver_config.dbp
+DB_CONNECTION.md
+CREDENTIAL_ACCESS.md

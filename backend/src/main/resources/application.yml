@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: letsplay-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/letsplay
+    username: letsplay
+    password: letsplay
+  jpa:
+    hibernate:
+      ddl-auto: update
+  security:
+    user:
+      name: user
+      password: password
+
+server:
+  port: 8082
+
+temporal:
+  target: 127.0.0.1:7233

@@ -1,0 +1,89 @@
+version: '3.5'
+
+services:
+  # PostgreSQL (Application DB)
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=letsplay
+      - POSTGRES_PASSWORD=letsplay
+      - POSTGRES_DB=letsplay
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - letsplay-network
+
+  # Temporal - Elasticsearch (Required for Temporal)
+  elasticsearch:
+    image: elasticsearch:7.16.2
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    networks:
+      - letsplay-network
+
+  # Temporal - PostgreSQL (System DB for Temporal)
+  temporal-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=temporal
+      - POSTGRES_PASSWORD=temporal
+    ports:
+      - "5433:5432"
+    volumes:
+      - temporal_data:/var/lib/postgresql/data
+    networks:
+      - letsplay-network
+
+  # Temporal Server
+  temporal:
+    image: temporalio/auto-setup:latest
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=temporal-db
+      - ES_SEEDS=elasticsearch
+      - ES_VERSION=v7
+    ports:
+      - "7233:7233" # gRPC
+    depends_on:
+      - temporal-db
+      - elasticsearch
+    networks:
+      - letsplay-network
+
+  # Temporal UI
+  temporal-ui:
+    image: temporalio/ui:latest
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - temporal
+    networks:
+      - letsplay-network
+
+  # Adminer (Optional - for DB inspection)
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8081:8080"
+    networks:
+      - letsplay-network
+
+networks:
+  letsplay-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  temporal_data:

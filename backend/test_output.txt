@@ -1,0 +1,77 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< com.letsplayplay:backend >----------------------
+[INFO] Building backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ backend ---
+[INFO] Deleting /Users/chandramouli/Desktop/letsplay/backend/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ backend ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ backend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 16 source files with javac [debug release 17] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ backend ---
+[INFO] skip non existing resourceDirectory /Users/chandramouli/Desktop/letsplay/backend/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ backend ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 2 source files with javac [debug release 17] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.letsplayplay.booking.BookingControllerIntegrationTest
+22:12:08.881 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.letsplayplay.booking.BookingControllerIntegrationTest]: BookingControllerIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+22:12:08.950 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.letsplayplay.letsplayPlayApplication for test class com.letsplayplay.booking.BookingControllerIntegrationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.2)
+
+2026-01-25T22:12:09.132+05:30  INFO 44594 --- [letsplay-backend] [           main] c.d.b.BookingControllerIntegrationTest   : Starting BookingControllerIntegrationTest using Java 25.0.2 with PID 44594 (started by chandramouli in /Users/chandramouli/Desktop/letsplay/backend)
+2026-01-25T22:12:09.133+05:30  INFO 44594 --- [letsplay-backend] [           main] c.d.b.BookingControllerIntegrationTest   : No active profile set, falling back to 1 default profile: "default"
+2026-01-25T22:12:09.414+05:30  INFO 44594 --- [letsplay-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-25T22:12:09.442+05:30  INFO 44594 --- [letsplay-backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 24 ms. Found 3 JPA repository interfaces.
+2026-01-25T22:12:09.672+05:30  INFO 44594 --- [letsplay-backend] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-25T22:12:09.704+05:30  INFO 44594 --- [letsplay-backend] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-01-25T22:12:09.717+05:30  INFO 44594 --- [letsplay-backend] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-01-25T22:12:09.816+05:30  INFO 44594 --- [letsplay-backend] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-25T22:12:09.827+05:30  INFO 44594 --- [letsplay-backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-25T22:12:09.945+05:30  INFO 44594 --- [letsplay-backend] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@113eed88
+2026-01-25T22:12:09.946+05:30  INFO 44594 --- [letsplay-backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-25T22:12:10.386+05:30  INFO 44594 --- [letsplay-backend] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-25T22:12:10.446+05:30  INFO 44594 --- [letsplay-backend] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-25T22:12:10.785+05:30  INFO 44594 --- [letsplay-backend] [           main] i.t.s.WorkflowServiceStubsImpl           : Created WorkflowServiceStubs for channel: ManagedChannelOrphanWrapper{delegate=ManagedChannelImpl{logId=1, target=127.0.0.1:7233}}
+2026-01-25T22:12:10.875+05:30  WARN 44594 --- [letsplay-backend] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-25T22:12:11.002+05:30  INFO 44594 --- [letsplay-backend] [       Thread-3] io.temporal.internal.worker.Poller       : start: Poller{name=Workflow Poller taskQueue="BookingTaskQueue", namespace="default", identity=44594@chandramoulis-MacBook-Pro.local}
+2026-01-25T22:12:11.005+05:30  INFO 44594 --- [letsplay-backend] [       Thread-3] io.temporal.internal.worker.Poller       : start: Poller{name=Activity Poller taskQueue="BookingTaskQueue", namespace="default", identity=44594@chandramoulis-MacBook-Pro.local}
+Temporal Worker started...
+2026-01-25T22:12:11.040+05:30  INFO 44594 --- [letsplay-backend] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@487f025, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7ef570be, org.springframework.security.web.context.SecurityContextHolderFilter@2052c49f, org.springframework.security.web.header.HeaderWriterFilter@68cc6fa4, org.springframework.web.filter.CorsFilter@5702232d, org.springframework.security.web.authentication.logout.LogoutFilter@274b0c2a, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@64547a83, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@df0b348, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@441c2d2a, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@39329d81, org.springframework.security.web.access.ExceptionTranslationFilter@5e572ad6, org.springframework.security.web.access.intercept.AuthorizationFilter@452ea8f0]
+2026-01-25T22:12:11.199+05:30  INFO 44594 --- [letsplay-backend] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-01-25T22:12:11.199+05:30  INFO 44594 --- [letsplay-backend] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-01-25T22:12:11.200+05:30  INFO 44594 --- [letsplay-backend] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-01-25T22:12:11.210+05:30  INFO 44594 --- [letsplay-backend] [           main] c.d.b.BookingControllerIntegrationTest   : Started BookingControllerIntegrationTest in 2.198 seconds (process running for 2.68)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.020 s -- in com.letsplayplay.booking.BookingControllerIntegrationTest
+[INFO] Running com.letsplayplay.workflow.BookingWorkflowTest
+2026-01-25T22:12:11.841+05:30  INFO 44594 --- [letsplay-backend] [           main] i.t.s.WorkflowServiceStubsImpl           : Created WorkflowServiceStubs for channel: ManagedChannelOrphanWrapper{delegate=ManagedChannelImpl{logId=6, target=directaddress:///3a7e9821-f19b-4171-9989-7765c4a63e45}}
+2026-01-25T22:12:11.842+05:30  INFO 44594 --- [letsplay-backend] [           main] i.t.serviceclient.TestServiceStubsImpl   : Created TestServiceStubs for channel: ManagedChannelOrphanWrapper{delegate=ManagedChannelImpl{logId=6, target=directaddress:///3a7e9821-f19b-4171-9989-7765c4a63e45}}
+2026-01-25T22:12:11.843+05:30  INFO 44594 --- [letsplay-backend] [           main] i.t.s.OperatorServiceStubsImpl           : Created OperatorServiceStubs for channel: ManagedChannelOrphanWrapper{delegate=ManagedChannelImpl{logId=6, target=directaddress:///3a7e9821-f19b-4171-9989-7765c4a63e45}}
+2026-01-25T22:12:11.854+05:30  INFO 44594 --- [letsplay-backend] [           main] io.temporal.internal.worker.Poller       : start: Poller{name=Activity Poller taskQueue="BookingTaskQueue", namespace="default", identity=44594@chandramoulis-MacBook-Pro.local}
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
