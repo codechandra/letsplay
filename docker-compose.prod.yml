@@ -38,7 +38,7 @@ services:
       - POSTGRES_SEEDS=temporal-db
       # - ES_SEEDS=elasticsearch (Removed)
       # - ES_VERSION=v7 (Removed)
-      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
+      # - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
     depends_on:
       - temporal-db
     networks:
