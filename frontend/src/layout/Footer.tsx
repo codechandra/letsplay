@@ -42,7 +42,7 @@ export function Footer() {
                 </div>
 
                 <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between text-xs font-medium text-slate-500">
-                    <p>&copy; 2026 letsplay Sports India Pvt Ltd. All rights reserved.</p>
+                    <p>&copy; 2026 letsplay Sports India Pvt Ltd. All rights reserved. | Built by Chandramouli</p>
                     <div className="flex gap-6 mt-4 md:mt-0">
                         <a href="#" className="hover:text-white">Privacy Policy</a>
                         <a href="#" className="hover:text-white">Terms of Supply</a>
