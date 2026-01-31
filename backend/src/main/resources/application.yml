@@ -1,25 +1,22 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
 spring:
-  application:
-    name: letsplay-backend
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/letsplay}
     username: ${SPRING_DATASOURCE_USERNAME:letsplay}
-    password: ${SPRING_DATASOURCE_PASSWORD:letsplay}
+    password: ${SPRING_DATASOURCE_PASSWORD:letsplay-secure-pass}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
-  sql:
-    init:
-      mode: always
-      data-locations: classpath:data.sql
-      continue-on-error: true
-  security:
-    user:
-      name: user
-      password: password
-
-server:
-  port: 8082
-
-temporal:
-  target: ${TEMPORAL_TARGET:127.0.0.1:7233}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  # Temporal Configuration
+  temporal:
+    target: ${TEMPORAL_TARGET:127.0.0.1:7233}
+    namespace: default
