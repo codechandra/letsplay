@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('booking flow', async ({ page }) => {
     // 1. Visit Home Page
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
     await expect(page).toHaveTitle(/letsplay/i);
 
     // 2. Click "Book A Court"

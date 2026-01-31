@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('slot blocking', async ({ page, browser }) => {
     // 1. Visit Home Page as User A
-    await page.goto('http://localhost:5173/');
+    await page.goto('/');
 
     // Navigate to venues
     await page.getByRole('button', { name: /browse venues/i }).first().click();
@@ -24,8 +24,10 @@ test('slot blocking', async ({ page, browser }) => {
     await expect(page.getByText('Booking Confirmed!', { exact: false })).toBeVisible({ timeout: 30000 });
 
     // 4. Open new Page as User B
-    const pageB = await browser.newPage();
-    await pageB.goto('http://localhost:5173/');
+    // 4. Open new Page as User B (New Context for isolation)
+    const contextB = await browser.newContext({ baseURL: 'http://13.127.159.219' });
+    const pageB = await contextB.newPage();
+    await pageB.goto('/');
     await pageB.getByRole('button', { name: /browse venues/i }).first().click();
     await pageB.waitForTimeout(2000);
     await pageB.locator('.group').first().click();

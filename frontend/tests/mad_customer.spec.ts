@@ -1,12 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-const PROD_URL = 'http://letsplay-frontend-1769695135.s3-website.ap-south-1.amazonaws.com';
-
+// Use strict selectors and relative URLs
 test.describe('Mad Customer Scenarios', () => {
 
     test('Scenario 1: Unauthenticated Booking Attempt', async ({ page }) => {
         // 1. Visit Home
-        await page.goto(PROD_URL);
+        await page.goto('/');
 
         // 2. Click Browse Venues
         await page.click('text=Browse Venues');
@@ -21,25 +20,29 @@ test.describe('Mad Customer Scenarios', () => {
 
     test('Scenario 2: Concurrent Booking Conflict', async ({ browser }) => {
         // Create two isolated contexts (two different users)
-        const contextA = await browser.newContext();
-        const contextB = await browser.newContext();
+        // Create two isolated contexts (two different users)
+        const contextA = await browser.newContext({ baseURL: 'http://13.127.159.219' });
+        const contextB = await browser.newContext({ baseURL: 'http://13.127.159.219' });
 
         const pageA = await contextA.newPage();
         const pageB = await contextB.newPage();
 
-        const groundUrl = `${PROD_URL}/booking/1`;
-
         // 1. User A logs in
-        await pageA.goto(`${PROD_URL}/auth/login`);
+        await pageA.goto('/auth/login');
         await pageA.fill('input[type="email"]', 'user@letsplay.com');
         await pageA.fill('input[type="password"]', 'password');
         await pageA.click('button:has-text("Sign In")');
         // Wait for Home Page content instead of strict URL
         await expect(pageA.getByText('Book Your Game', { exact: false })).toBeVisible();
-        await pageA.goto(groundUrl);
+
+        // Find ground link from button
+        const bookBtnA = pageA.locator('text=Browse Venues');
+        await bookBtnA.click();
+        await pageA.click('text=Book Now'); // Assuming first one
+        const groundUrl = pageA.url();
 
         // 2. User B logs in
-        await pageB.goto(`${PROD_URL}/auth/login`);
+        await pageB.goto('/auth/login');
         await pageB.fill('input[type="email"]', 'owner@letsplay.com'); // Different user
         await pageB.fill('input[type="password"]', 'password');
         await pageB.click('button:has-text("Sign In")');
@@ -82,7 +85,7 @@ test.describe('Mad Customer Scenarios', () => {
 
     test('Scenario 3: Create New Account', async ({ page }) => {
         // 1. Visit Signup
-        await page.goto(`${PROD_URL}/auth/signup`);
+        await page.goto('/auth/signup');
 
         // 2. Fill Form with Random Email to avoid collision
         const randomEmail = `mad_customer_${Date.now()}@test.com`;

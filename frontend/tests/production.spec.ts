@@ -1,18 +1,16 @@
 import { test, expect } from '@playwright/test';
 
-const PROD_URL = 'http://letsplay-frontend-1769695135.s3-website.ap-south-1.amazonaws.com';
-
 test('Production: Full Booking Flow', async ({ page }) => {
     // 1. Visit Home Page
-    await page.goto(PROD_URL);
+    await page.goto('/');
     await expect(page).toHaveTitle(/letsplay/i);
 
     // 2. Login First
-    await page.goto(`${PROD_URL}/auth/login`);
+    await page.goto('/auth/login');
     await page.fill('input[type="email"]', 'user@letsplay.com');
     await page.fill('input[type="password"]', 'password');
     await page.click('button:has-text("Sign In")');
-    await page.waitForURL(`${PROD_URL}/`); // Expect redirect to home
+    await page.waitForURL('/'); // Expect redirect to home
 
     // 3. Navigate to Explorer
     // The HomePage has a "Browse Venues" button
@@ -23,7 +21,8 @@ test('Production: Full Booking Flow', async ({ page }) => {
     await page.click('text=Book Now');
 
     // 4. Verify in Booking Page
-    await expect(page).toHaveURL(/.*\/booking\/\d+/);
+    // Adjust regex to match either /booking or /bookings
+    await expect(page).toHaveURL(/.*\/booking.*\/\d+/);
     await expect(page.getByText('Play Arena - Sarjapur')).toBeVisible();
 
     // 5. Click "Proceed to Checkout"
