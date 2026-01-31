@@ -8,7 +8,7 @@ export default {
         extend: {
             colors: {
                 letsplay: {
-                    blue: '#667eea',
+                    blue: '#585FBE', // Deep Indigo
                     purple: '#764ba2',
                     pink: '#f093fb',
                     coral: '#f5576c',
@@ -18,16 +18,16 @@ export default {
                     gold: '#fee140',
                 },
                 primary: {
-                    50: '#f5f7ff',
-                    100: '#ebefff',
-                    200: '#d6dffe',
-                    300: '#b3c1fd',
-                    400: '#8a9bfa',
-                    500: '#667eea',
-                    600: '#5568d3',
-                    700: '#4553b8',
-                    800: '#3a4494',
-                    900: '#323a78',
+                    50: '#efeffb',
+                    100: '#e0e1f7',
+                    200: '#c2c5ef',
+                    300: '#a3a8e6',
+                    400: '#848bdd',
+                    500: '#585FBE', // Base
+                    600: '#464c98',
+                    700: '#353972',
+                    800: '#23264c',
+                    900: '#121326',
                 },
             },
             fontFamily: {
@@ -35,16 +35,16 @@ export default {
                 display: ['Poppins', 'system-ui', 'sans-serif'],
             },
             backgroundImage: {
-                'gradient-primary': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'gradient-primary': 'linear-gradient(135deg, #585FBE 0%, #764ba2 100%)',
                 'gradient-secondary': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                 'gradient-success': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                 'gradient-warm': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
                 'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))',
             },
             boxShadow: {
-                'glow': '0 0 20px rgba(102, 126, 234, 0.4)',
-                'glow-lg': '0 0 40px rgba(102, 126, 234, 0.6)',
-                'inner-glow': 'inset 0 0 20px rgba(102, 126, 234, 0.2)',
+                'glow': '0 0 20px rgba(88, 95, 190, 0.4)',
+                'glow-lg': '0 0 40px rgba(88, 95, 190, 0.6)',
+                'inner-glow': 'inset 0 0 20px rgba(88, 95, 190, 0.2)',
             },
             animation: {
                 'float': 'float 3s ease-in-out infinite',

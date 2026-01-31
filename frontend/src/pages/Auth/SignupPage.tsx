@@ -3,6 +3,7 @@ import { API_BASE_URL } from '../../utils/apiConfig';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { motion } from 'framer-motion';
+import { useToast } from '../../context/ToastContext';
 
 export default function SignupPage() {
     const [name, setName] = useState('');
@@ -10,6 +11,7 @@ export default function SignupPage() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const { showToast } = useToast();
     const navigate = useNavigate();
 
     const handleSignup = async (e: React.FormEvent) => {
@@ -26,6 +28,7 @@ export default function SignupPage() {
 
             if (!res.ok) throw new Error('User already exists or registration failed');
 
+            showToast('Account created successfully! Please login.', 'success');
             navigate('/auth/login');
         } catch (err: any) {
             setError(err.message);

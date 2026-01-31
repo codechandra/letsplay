@@ -64,4 +64,10 @@ public class BookingService {
         booking.setJoinedPlayers(booking.getJoinedPlayers() + 1);
         return bookingRepository.save(booking);
     }
+
+    public java.util.List<Booking> getBookedSlots(Long groundId, java.time.LocalDate date) {
+        java.time.LocalDateTime startOfDay = date.atStartOfDay();
+        java.time.LocalDateTime endOfDay = date.atTime(java.time.LocalTime.MAX);
+        return bookingRepository.findByGroundIdAndStartTimeBetween(groundId, startOfDay, endOfDay);
+    }
 }

@@ -10,6 +10,9 @@ export interface Booking {
     endTime: string;   // ISO String
     status?: 'PENDING' | 'CONFIRMED' | 'FAILED' | 'CANCELLED';
     temporalWorkflowId?: string;
+    isPublic?: boolean;
+    maxPlayers?: number;
+    joinedPlayers?: number;
 }
 
 export function useBooking() {
@@ -44,10 +47,36 @@ export function useBooking() {
         }
     }, []);
 
+    // Helper to get current user ID
+    const getUserId = () => {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) return null;
+        try {
+            const user = JSON.parse(userStr);
+            return user.id;
+        } catch (e) {
+            return null;
+        }
+    };
+
+    // Helper to format Date as Local ISO string (YYYY-MM-DDTHH:mm:ss)
+    const toLocalISOString = (date: Date) => {
+        const offset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+        const localISOTime = (new Date(date.getTime() - offset)).toISOString().slice(0, -1);
+        return localISOTime;
+    };
+
     const createBooking = async (venueId: number, startTime: Date, endTime: Date, isPublic: boolean = false, maxPlayers: number = 1) => {
         setIsLoading(true);
         setError(null);
         setStatus('PENDING');
+
+        const userId = getUserId();
+        if (!userId) {
+            setError('Please login to book');
+            setIsLoading(false);
+            return;
+        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/bookings`, {
@@ -56,10 +85,10 @@ export function useBooking() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    user: { id: 1 }, // Hardcoded user for now
+                    user: { id: userId },
                     ground: { id: venueId },
-                    startTime: startTime.toISOString(),
-                    endTime: endTime.toISOString(),
+                    startTime: toLocalISOString(startTime),
+                    endTime: toLocalISOString(endTime),
                     isPublic,
                     maxPlayers
                 })
@@ -83,8 +112,63 @@ export function useBooking() {
         }
     };
 
+    const joinBooking = async (existingBookingId: number) => {
+        setIsLoading(true);
+        setError(null);
+        setStatus('PENDING');
+
+        const userId = getUserId();
+        if (!userId) {
+            setError('Please login to join');
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/bookings/${existingBookingId}/join?userId=${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+
+            // Response is now a JoinRequest, not Booking
+            // const request = await response.json(); 
+            // We just set status to CONFIRMED (as in request sent)
+            setStatus('CONFIRMED');
+
+            // For UI feedback, we might want to distinguish between "Booking Confirmed" and "Request Sent"
+            // But for now, CONFIRMED "Request Sent" works.
+
+        } catch (e: any) {
+            console.error(e);
+            setError(e.message || 'Join Request Failed');
+            setIsLoading(false);
+            setStatus('FAILED');
+        }
+    };
+
+    const respondToRequest = async (requestId: number, action: 'ACCEPTED' | 'REJECTED') => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/requests/${requestId}/respond?status=${action}`, {
+                method: 'POST'
+            });
+            if (!res.ok) throw new Error('Failed to respond');
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    };
+
     return {
         createBooking,
+        joinBooking,
+        respondToRequest,
         status,
         bookingId,
         isLoading,

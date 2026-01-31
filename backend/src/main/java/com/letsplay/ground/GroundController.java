@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/grounds")
+@RequestMapping("/grounds")
 public class GroundController {
 
     private final GroundRepository groundRepository;

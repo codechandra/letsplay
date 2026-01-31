@@ -69,6 +69,16 @@ public class DataSeeder implements CommandLineRunner {
             createGround("Smash Bounce", "HSR Layout", "Badminton", 600.0,
                     "https://images.unsplash.com/photo-1626248801379-51a0748a5f96", owner);
 
+            // New Grounds
+            createGround("Grand Slam Tennis", "Whitefield", "Tennis", 1000.0,
+                    "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0", owner);
+            createGround("Dunk Yard", "JP Nagar", "Basketball", 900.0,
+                    "https://images.unsplash.com/photo-1546519638-68e109498ee3", owner);
+            createGround("Blue Waves Centre", "Bannerghatta", "Swimming", 400.0,
+                    "https://images.unsplash.com/photo-1530549387789-4c1017266635", owner);
+            createGround("Shuttle Zone Pro", "Marathahalli", "Badminton", 650.0,
+                    "https://images.unsplash.com/photo-1613918108466-292b78a8ef95", owner);
+
             System.out.println("Seeded Default Grounds");
         }
     }

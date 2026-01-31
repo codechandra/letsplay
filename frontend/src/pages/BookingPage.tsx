@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../utils/apiConfig';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useBooking } from '../hooks/useBooking';
 import { Button } from '../components/ui/Button';
-import { Calendar, Clock, MapPin, CheckCircle2, XCircle, Loader2, Users, Globe, IndianRupee, ArrowLeft } from 'lucide-react';
+import ChatWindow from '../components/Chat/ChatWindow';
+import { Calendar, Clock, MapPin, Loader2, Users, Globe, IndianRupee, ArrowLeft, Share2, Star, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -15,6 +15,19 @@ interface Ground {
     description: string;
     pricePerHour: number;
     imageUrl: string;
+    owner: {
+        id: number;
+        name: string;
+    };
+}
+
+interface Booking {
+    id: number;
+    startTime: string;
+    endTime: string;
+    isPublic: boolean;
+    maxPlayers: number;
+    joinedPlayers?: number;
 }
 
 const TIME_SLOTS = [
@@ -29,10 +42,11 @@ const DURATIONS = [
     { hours: 3, label: '3 Hours' }
 ];
 
+type BookingStatus = 'IDLE' | 'PENDING' | 'CONFIRMED' | 'FAILED';
+
 export function BookingPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { createBooking, status, error, bookingId } = useBooking();
 
     const [venue, setVenue] = useState<Ground | null>(null);
     const [loading, setLoading] = useState(true);
@@ -41,6 +55,12 @@ export function BookingPage() {
     const [duration, setDuration] = useState<number>(1);
     const [isPublic, setIsPublic] = useState(false);
     const [maxPlayers, setMaxPlayers] = useState(4);
+    const [bookedSlots, setBookedSlots] = useState<Booking[]>([]);
+    const [joinableBookingId, setJoinableBookingId] = useState<number | null>(null);
+
+    const [bookingStatus, setBookingStatus] = useState<BookingStatus>('IDLE');
+    const [bookingError, setBookingError] = useState<string | null>(null);
+    const [confirmedBookingId, setConfirmedBookingId] = useState<number | null>(null);
 
     useEffect(() => {
         if (id && !isNaN(Number(id))) {
@@ -57,8 +77,135 @@ export function BookingPage() {
         }
     }, [id]);
 
-    const handleConfirmBooking = () => {
+    useEffect(() => {
+        if (venue && selectedDate) {
+            // Fix: Use local date string instead of ISO (UTC) to avoid previous day fetch
+            const offset = selectedDate.getTimezoneOffset() * 60000;
+            const localDate = new Date(selectedDate.getTime() - offset);
+            const dateStr = localDate.toISOString().split('T')[0];
+
+            fetch(`${API_BASE_URL}/bookings/slots?groundId=${venue.id}&date=${dateStr}`)
+                .then(res => res.json())
+                .then(data => setBookedSlots(data))
+                .catch(err => console.error("Failed to fetch slots", err));
+        }
+    }, [venue, selectedDate]);
+
+    // Reset joinable state when date changes
+    useEffect(() => {
+        setJoinableBookingId(null);
+    }, [selectedDate, venue]);
+
+    const getSlotStatus = (timeStr: string) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+
+        // Start time of the proposed slot
+        const slotStart = new Date(selectedDate);
+        slotStart.setHours(hours, minutes, 0, 0);
+
+        // End time of the proposed slot
+        const slotEnd = new Date(slotStart);
+        slotEnd.setHours(slotStart.getHours() + duration);
+
+        const overlappingBooking = bookedSlots.find(booking => {
+            const bookingStart = new Date(booking.startTime);
+            const bookingEnd = new Date(booking.endTime);
+            return slotStart < bookingEnd && bookingStart < slotEnd;
+        });
+
+        if (!overlappingBooking) return { status: 'AVAILABLE' };
+
+        // Check if joinable
+        if (overlappingBooking.isPublic &&
+            (overlappingBooking.joinedPlayers || 1) < (overlappingBooking.maxPlayers || 1)) {
+            return { status: 'JOINABLE', bookingId: overlappingBooking.id };
+        }
+
+        return { status: 'BOOKED' };
+    };
+
+    const handleSlotClick = (time: string) => {
+        const { status, bookingId } = getSlotStatus(time);
+
+        if (status === 'BOOKED') return;
+
+        setSelectedTime(time);
+        if (status === 'JOINABLE') {
+            setJoinableBookingId(bookingId!);
+        } else {
+            setJoinableBookingId(null);
+        }
+    };
+
+    const createBooking = async (groundId: number, startTime: Date, endTime: Date, isPublic: boolean, maxPlayers: number) => {
+        setBookingStatus('PENDING');
+        setBookingError(null);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/bookings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    groundId,
+                    startTime: startTime.toISOString(),
+                    endTime: endTime.toISOString(),
+                    isPublic,
+                    maxPlayers
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create booking');
+            }
+
+            const data = await response.json();
+            setConfirmedBookingId(data.id);
+            setBookingStatus('CONFIRMED');
+        } catch (err: any) {
+            setBookingError(err.message);
+            setBookingStatus('FAILED');
+        }
+    };
+
+    const joinBooking = async (bookingId: number) => {
+        setBookingStatus('PENDING');
+        setBookingError(null);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/join`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({}) // Empty body for join
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to join booking');
+            }
+
+            const data = await response.json();
+            setConfirmedBookingId(data.id);
+            setBookingStatus('CONFIRMED');
+        } catch (err: any) {
+            setBookingError(err.message);
+            setBookingStatus('FAILED');
+        }
+    };
+
+    const handleConfirmAction = () => {
         if (!venue) return;
+
+        if (joinableBookingId) {
+            joinBooking(joinableBookingId);
+            return;
+        }
 
         const [hours, minutes] = selectedTime.split(':').map(Number);
         const startTime = new Date(selectedDate);
@@ -158,13 +305,40 @@ export function BookingPage() {
                                 </p>
                             </div>
                         </div>
+
+                        {/* Host Info */}
+                        <div className="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-sm border border-slate-100">
+                            <h3 className="font-bold text-lg mb-4">Host</h3>
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-letsplay-blue/10 rounded-full flex items-center justify-center text-letsplay-blue font-bold text-xl">
+                                    {venue.owner.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <p className="font-bold text-slate-900">{venue.owner.name}</p>
+                                    <p className="text-sm text-slate-500">Venue Owner</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Chat Window (Only visible if logged in - simplistic check for demo) */}
+                        <div className="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-sm border border-slate-100">
+                            <h3 className="font-bold text-lg mb-4">Team Chat</h3>
+                            {/* Mocking current user for demo. In real app, get from context */}
+                            <ChatWindow
+                                bookingId={Number(id)}
+                                currentUser={{
+                                    id: JSON.parse(localStorage.getItem('user') || '{}').id || 999,
+                                    name: JSON.parse(localStorage.getItem('user') || '{}').name || 'Anonymous'
+                                }}
+                            />
+                        </div>
                     </div>
 
                     {/* Right: Booking Form - Takes 2 columns on desktop, sticky */}
                     <div className="lg:col-span-2">
                         <div className="bg-white p-4 lg:p-6 rounded-xl lg:rounded-2xl shadow-lg lg:sticky lg:top-24">
                             <AnimatePresence mode="wait">
-                                {!status ? (
+                                {!bookingStatus || bookingStatus === 'IDLE' ? (
                                     <motion.div
                                         key="booking-form"
                                         initial={{ opacity: 0 }}
@@ -244,24 +418,50 @@ export function BookingPage() {
                                             <label className="block text-sm font-bold text-slate-700 mb-3">
                                                 Select Time Slot
                                             </label>
-                                            <div className="grid grid-cols-4 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
-                                                {TIME_SLOTS.map((time) => {
-                                                    const isSelected = time === selectedTime;
-                                                    return (
-                                                        <button
-                                                            key={time}
-                                                            onClick={() => setSelectedTime(time)}
-                                                            className={cn(
-                                                                "p-2.5 lg:p-3 rounded-lg border-2 font-bold transition-all text-sm",
-                                                                isSelected
-                                                                    ? "border-letsplay-blue bg-letsplay-blue text-white"
-                                                                    : "border-slate-200 hover:border-letsplay-blue/50"
-                                                            )}
-                                                        >
-                                                            {time}
-                                                        </button>
-                                                    );
-                                                })}
+
+                                            <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                                                {[
+                                                    { label: 'Morning', slots: TIME_SLOTS.filter(t => parseInt(t) < 12) },
+                                                    { label: 'Afternoon', slots: TIME_SLOTS.filter(t => parseInt(t) >= 12 && parseInt(t) < 17) },
+                                                    { label: 'Evening', slots: TIME_SLOTS.filter(t => parseInt(t) >= 17) }
+                                                ].map((group) => (
+                                                    <div key={group.label}>
+                                                        <h4 className="text-xs font-bold text-slate-400 uppercase mb-2 ml-1">{group.label}</h4>
+                                                        <div className="grid grid-cols-4 lg:grid-cols-3 gap-2">
+                                                            {group.slots.map((time) => {
+                                                                const isSelected = time === selectedTime;
+                                                                const { status } = getSlotStatus(time);
+                                                                const isJoinable = status === 'JOINABLE';
+                                                                const isBooked = status === 'BOOKED';
+
+                                                                return (
+                                                                    <button
+                                                                        key={time}
+                                                                        disabled={isBooked}
+                                                                        onClick={() => handleSlotClick(time)}
+                                                                        className={cn(
+                                                                            "p-2.5 lg:p-3 rounded-lg border-2 font-bold transition-all text-sm relative overflow-hidden",
+                                                                            isSelected
+                                                                                ? isJoinable
+                                                                                    ? "border-green-500 bg-green-500 text-white"
+                                                                                    : "border-letsplay-blue bg-letsplay-blue text-white shadow-lg shadow-indigo-200"
+                                                                                : isJoinable
+                                                                                    ? "border-green-200 bg-green-50 text-green-700 hover:border-green-500"
+                                                                                    : isBooked
+                                                                                        ? "border-slate-100 bg-slate-100 text-slate-400 cursor-not-allowed decoration-slice"
+                                                                                        : "border-slate-200 hover:border-letsplay-blue/50 hover:bg-indigo-50"
+                                                                        )}
+                                                                    >
+                                                                        {time}
+                                                                        {isJoinable && !isSelected && (
+                                                                            <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-500 rounded-full"></span>
+                                                                        )}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
 
@@ -308,13 +508,22 @@ export function BookingPage() {
                                             )}
                                         </div>
 
-                                        {/* Confirm Button */}
+                                        {/* Confirm/Join Button */}
                                         <Button
-                                            onClick={handleConfirmBooking}
-                                            className="w-full h-12 lg:h-14 text-base lg:text-lg shadow-lg"
+                                            onClick={handleConfirmAction}
+                                            disabled={getSlotStatus(selectedTime).status === 'BOOKED'}
+                                            className={cn(
+                                                "w-full h-12 lg:h-14 text-base lg:text-lg shadow-lg shadow-indigo-300",
+                                                joinableBookingId ? "bg-green-600 hover:bg-green-700" : "bg-letsplay-blue hover:bg-indigo-700"
+                                            )}
                                             size="lg"
                                         >
-                                            Confirm Booking
+                                            {getSlotStatus(selectedTime).status === 'BOOKED'
+                                                ? 'Slot Unavailable'
+                                                : joinableBookingId
+                                                    ? 'Join Game'
+                                                    : 'Confirm Booking'
+                                            }
                                         </Button>
                                     </motion.div>
                                 ) : (
@@ -324,36 +533,56 @@ export function BookingPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         className="text-center py-8"
                                     >
-                                        {status === 'PENDING' && (
+                                        {bookingStatus === 'PENDING' && (
                                             <>
                                                 <Loader2 className="w-16 h-16 text-letsplay-blue animate-spin mx-auto mb-4" />
                                                 <h3 className="text-xl font-bold text-slate-800 mb-2">Processing...</h3>
                                                 <p className="text-sm text-slate-500">Confirming your booking</p>
                                             </>
                                         )}
-                                        {status === 'CONFIRMED' && (
+                                        {bookingStatus === 'CONFIRMED' && (
                                             <>
                                                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                                     <CheckCircle2 className="w-10 h-10 text-green-600" />
                                                 </div>
                                                 <h3 className="text-2xl font-bold text-green-700 mb-2">Booking Confirmed!</h3>
-                                                <p className="text-sm text-slate-500 mb-4">Your slot has been reserved</p>
-                                                <div className="bg-green-50 p-4 rounded-lg border border-green-100 mb-6">
-                                                    <p className="text-xs font-bold text-green-600 uppercase">Booking ID</p>
-                                                    <p className="text-2xl font-black text-green-800">#{bookingId}</p>
+                                                <p className="text-sm text-slate-500 mb-6">Your slot has been reserved successfully</p>
+
+                                                <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 mb-6 text-left space-y-3">
+                                                    <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+                                                        <span className="text-sm text-slate-500">Booking ID</span>
+                                                        <span className="font-mono font-bold text-slate-900">#{confirmedBookingId}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-sm text-slate-500">Venue</span>
+                                                        <span className="font-medium text-slate-900">{venue.name}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-sm text-slate-500">Date</span>
+                                                        <span className="font-medium text-slate-900">{selectedDate.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-sm text-slate-500">Time</span>
+                                                        <span className="font-bold text-letsplay-blue">{selectedTime} ({duration}h)</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center pt-3 border-t border-slate-200">
+                                                        <span className="text-sm font-bold text-slate-700">Total Paid</span>
+                                                        <span className="font-bold text-xl text-green-600 flex items-center"><IndianRupee className="w-4 h-4" />{totalPrice}</span>
+                                                    </div>
                                                 </div>
-                                                <Button onClick={() => navigate('/my-bookings')} className="w-full">
+
+                                                <Button onClick={() => navigate('/my-bookings')} className="w-full bg-letsplay-blue hover:bg-indigo-700">
                                                     View My Bookings
                                                 </Button>
                                             </>
                                         )}
-                                        {status === 'FAILED' && (
+                                        {bookingStatus === 'FAILED' && (
                                             <>
                                                 <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                                     <XCircle className="w-10 h-10 text-red-600" />
                                                 </div>
                                                 <h3 className="text-2xl font-bold text-red-700 mb-2">Booking Failed</h3>
-                                                <p className="text-sm text-slate-500 mb-6">{error || "Please try again"}</p>
+                                                <p className="text-sm text-slate-500 mb-6">{bookingError || "Please try again"}</p>
                                                 <Button onClick={() => window.location.reload()} className="w-full">
                                                     Try Again
                                                 </Button>

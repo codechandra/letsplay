@@ -3,6 +3,16 @@ import { API_BASE_URL } from '../utils/apiConfig';
 import { Calendar, Clock, MapPin, CheckCircle, XCircle, Loader2, Users } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { cn } from '../utils/cn';
+import { useBooking } from '../hooks/useBooking';
+
+interface JoinRequest {
+    id: number;
+    requester: {
+        id: number;
+        name: string;
+    };
+    status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+}
 
 interface Booking {
     id: number;
@@ -26,6 +36,50 @@ export default function MyBookingsPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+
+    // State for Requests
+    const [expandedBookingId, setExpandedBookingId] = useState<number | null>(null);
+    const [requests, setRequests] = useState<JoinRequest[]>([]);
+    const [reqLoading, setReqLoading] = useState(false);
+
+    const { respondToRequest } = useBooking();
+
+    const toggleRequests = async (bookingId: number) => {
+        if (expandedBookingId === bookingId) {
+            setExpandedBookingId(null);
+            return;
+        }
+
+        setExpandedBookingId(bookingId);
+        setReqLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}/requests`);
+            if (res.ok) {
+                const data = await res.json();
+                setRequests(data.filter((r: JoinRequest) => r.status === 'PENDING'));
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setReqLoading(false);
+        }
+    };
+
+    const handleResponse = async (reqId: number, status: 'ACCEPTED' | 'REJECTED') => {
+        const success = await respondToRequest(reqId, status);
+        if (success) {
+            setRequests(prev => prev.filter(r => r.id !== reqId));
+            // Update booking count if accepted
+            if (status === 'ACCEPTED') {
+                setBookings(prev => prev.map(b => {
+                    if (b.id === expandedBookingId) {
+                        return { ...b, joinedPlayers: (b.joinedPlayers || 0) + 1 };
+                    }
+                    return b;
+                }));
+            }
+        }
+    };
 
     useEffect(() => {
         // In a real app, fetch user's bookings
@@ -202,6 +256,16 @@ export default function MyBookingsPage() {
                                             )}
 
                                             <div className="flex items-center gap-3">
+                                                {booking.isPublic && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => toggleRequests(booking.id)}
+                                                        className="whitespace-nowrap bg-slate-50"
+                                                    >
+                                                        {expandedBookingId === booking.id ? 'Hide Requests' : 'Manage Requests'}
+                                                    </Button>
+                                                )}
                                                 {booking.totalAmount && (
                                                     <div className="text-right">
                                                         <p className="text-xs text-slate-400">Total</p>
@@ -219,10 +283,41 @@ export default function MyBookingsPage() {
                                             </div>
                                         </div>
 
-                                        {/* Mobile Booking ID */}
-                                        <div className="sm:hidden mt-3 pt-3 border-t text-center">
-                                            <p className="text-xs text-slate-400">Booking ID: <span className="font-bold text-slate-900">#{booking.id}</span></p>
-                                        </div>
+                                        {/* Requests Section */}
+                                        {expandedBookingId === booking.id && (
+                                            <div className="mt-4 bg-slate-50 rounded-lg p-4 border border-slate-100 animate-fade-in">
+                                                <h4 className="font-bold text-sm mb-3">Pending Requests</h4>
+                                                {reqLoading ? (
+                                                    <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                                                ) : requests.length === 0 ? (
+                                                    <p className="text-xs text-slate-500">No pending requests.</p>
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        {requests.map(req => (
+                                                            <div key={req.id} className="flex items-center justify-between bg-white p-2 rounded shadow-sm border border-slate-100">
+                                                                <span className="text-sm font-bold text-slate-700">{req.requester.name}</span>
+                                                                <div className="flex gap-2">
+                                                                    <button
+                                                                        onClick={() => handleResponse(req.id, 'ACCEPTED')}
+                                                                        className="p-1 hover:bg-green-100 text-green-600 rounded"
+                                                                        title="Accept"
+                                                                    >
+                                                                        <CheckCircle className="w-5 h-5" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleResponse(req.id, 'REJECTED')}
+                                                                        className="p-1 hover:bg-red-100 text-red-600 rounded"
+                                                                        title="Reject"
+                                                                    >
+                                                                        <XCircle className="w-5 h-5" />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

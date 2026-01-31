@@ -3,12 +3,14 @@ import { API_BASE_URL } from '../../utils/apiConfig';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { motion } from 'framer-motion';
+import { useToast } from '../../context/ToastContext';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const { showToast } = useToast();
     const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -27,6 +29,7 @@ export default function LoginPage() {
 
             const user = await res.json();
             localStorage.setItem('user', JSON.stringify(user));
+            showToast('Welcome back!', 'success');
             navigate('/');
         } catch (err: any) {
             setError(err.message);

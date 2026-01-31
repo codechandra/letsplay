@@ -1,17 +1,24 @@
 import { test, expect } from '@playwright/test';
 
-const PROD_URL = 'http://13.234.116.216';
+const PROD_URL = 'http://letsplay-frontend-1769695135.s3-website.ap-south-1.amazonaws.com';
 
 test('Production: Full Booking Flow', async ({ page }) => {
     // 1. Visit Home Page
     await page.goto(PROD_URL);
     await expect(page).toHaveTitle(/letsplay/i);
 
-    // 2. Navigate to Explorer
-    // The HomePage has a "Book A Court" button or category links
-    await page.click('text=Book Venue');
+    // 2. Login First
+    await page.goto(`${PROD_URL}/auth/login`);
+    await page.fill('input[type="email"]', 'user@letsplay.com');
+    await page.fill('input[type="password"]', 'password');
+    await page.click('button:has-text("Sign In")');
+    await page.waitForURL(`${PROD_URL}/`); // Expect redirect to home
 
-    // 3. Select the first ground
+    // 3. Navigate to Explorer
+    // The HomePage has a "Browse Venues" button
+    await page.click('text=Browse Venues');
+
+    // 4. Select the first ground
     await page.waitForSelector('text=Play Arena - Sarjapur');
     await page.click('text=Book Now');
 

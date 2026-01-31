@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -40,7 +40,14 @@ public class AuthController {
         if (userRepository.findAll().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
             return ResponseEntity.badRequest().body(Map.of("message", "User already exists"));
         }
-        user.setRoles(Collections.singleton(User.Role.USER));
-        return ResponseEntity.ok(userRepository.save(user));
+        try {
+            user.setRoles(new java.util.HashSet<>(Collections.singleton(User.Role.USER)));
+            User savedUser = userRepository.save(user);
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("message", "Registration failed: " + e.getMessage()));
+        }
     }
 }

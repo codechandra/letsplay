@@ -43,6 +43,10 @@ services:
     restart: always
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
+    deploy:
+      resources:
+        limits:
+          memory: 150M
     ports:
       - "8081:8080"
     depends_on:
@@ -51,23 +55,49 @@ services:
       - letsplay-prod
 
   # --- Application ---
+  letsplay-db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=letsplay
+      - POSTGRES_PASSWORD=letsplay-secure-pass
+      - POSTGRES_DB=letsplay
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - letsplay-prod
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U letsplay" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     restart: always
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${RDS_ENDPOINT}:5432/letsplay?sslmode=verify-ca&sslrootcert=/app/rds-ca.pem
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://letsplay-db:5432/letsplay
       - SPRING_DATASOURCE_USERNAME=letsplay
       - SPRING_DATASOURCE_PASSWORD=letsplay-secure-pass
       - TEMPORAL_TARGET=temporal:7233
       - JAVA_TOOL_OPTIONS="-Xmx256m"
-    volumes:
-      - ./rds-ca.pem:/app/rds-ca.pem:ro
     depends_on:
       - temporal
+      - letsplay-db
+    ports:
+      - "80:8080"
     networks:
       - letsplay-prod
+    deploy:
+      resources:
+        limits:
+          memory: 350M
 
   frontend:
     build:
@@ -75,7 +105,9 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "80:80"
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:80
     depends_on:
       - backend
     networks:
@@ -85,4 +117,7 @@ networks:
   letsplay-prod:
     driver: bridge
 
-# Main app data on RDS, Temporal metadata local
+volumes:
+  postgres_data:
+
+

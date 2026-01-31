@@ -1,5 +1,6 @@
 import { Search, User, Heart, ShoppingCart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { NotificationCenter } from '../components/NotificationCenter';
 
 export function Navbar() {
     const userStr = localStorage.getItem('user');
@@ -56,6 +57,7 @@ export function Navbar() {
                 <div className="flex items-center gap-6 text-slate-700">
                     {user ? (
                         <div className="flex items-center gap-4">
+                            <NotificationCenter />
                             <div className="hidden lg:flex flex-col items-end">
                                 <span className="text-sm font-bold text-slate-900">{user.name}</span>
                                 <div className="flex gap-2">

@@ -14,31 +14,44 @@ import PlayerBookingsPage from './pages/Dashboard/PlayerBookingsPage';
 import PlayerTeamsPage from './pages/Dashboard/PlayerTeamsPage';
 import OwnerDashboard from './pages/Dashboard/OwnerDashboard';
 import CoachDashboard from './pages/Dashboard/CoachDashboard';
+import AdminLayout from './layout/AdminLayout';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import AdminGroundsPage from './pages/Admin/AdminGroundsPage';
 import { useEffect } from 'react';
+import { ToastProvider } from './context/ToastContext';
 
 function App() {
   return (
-    <Routes>
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/venues" element={<VenuesPage />} />
-        <Route path="/booking/:id" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
-        <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-        <Route path="/my-bookings" element={<ProtectedRoute><MyBookingsPage /></ProtectedRoute>} />
-        <Route path="/auth/login" element={<LoginPage />} />
-        <Route path="/auth/signup" element={<SignupPage />} />
+    <ToastProvider>
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/venues" element={<VenuesPage />} />
+          <Route path="/booking/:id" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+          <Route path="/my-bookings" element={<ProtectedRoute><MyBookingsPage /></ProtectedRoute>} />
+          <Route path="/auth/login" element={<LoginPage />} />
+          <Route path="/auth/signup" element={<SignupPage />} />
 
-        {/* Dashboards */}
-        <Route path="/dashboard" element={<DashboardRedirect />} />
-        <Route path="/dashboard/player" element={<DashboardLayout role="PLAYER"><PlayerDashboard /></DashboardLayout>} />
-        <Route path="/dashboard/player/bookings" element={<DashboardLayout role="PLAYER"><PlayerBookingsPage /></DashboardLayout>} />
-        <Route path="/dashboard/player/teams" element={<DashboardLayout role="PLAYER"><PlayerTeamsPage /></DashboardLayout>} />
-        <Route path="/dashboard/owner" element={<DashboardLayout role="OWNER"><OwnerDashboard /></DashboardLayout>} />
-        <Route path="/dashboard/coach" element={<DashboardLayout role="COACH"><CoachDashboard /></DashboardLayout>} />
+          {/* Dashboards */}
+          <Route path="/dashboard" element={<DashboardRedirect />} />
+          <Route path="/dashboard/player" element={<DashboardLayout role="PLAYER"><PlayerDashboard /></DashboardLayout>} />
+          <Route path="/dashboard/player/bookings" element={<DashboardLayout role="PLAYER"><PlayerBookingsPage /></DashboardLayout>} />
+          <Route path="/dashboard/player/teams" element={<DashboardLayout role="PLAYER"><PlayerTeamsPage /></DashboardLayout>} />
+          <Route path="/dashboard/owner" element={<DashboardLayout role="OWNER"><OwnerDashboard /></DashboardLayout>} />
+          <Route path="/dashboard/coach" element={<DashboardLayout role="COACH"><CoachDashboard /></DashboardLayout>} />
 
-        <Route path="*" element={<div className="p-20 text-center text-slate-500 font-bold">404 - Not Found</div>} />
-      </Route>
-    </Routes>
+          {/* Admin Routes */}
+          <Route path="/admin" element={<ProtectedRoute role="ADMIN"><AdminLayout /></ProtectedRoute>}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="grounds" element={<AdminGroundsPage />} />
+            <Route path="users" element={<div className="p-10 text-center text-slate-400">User Management Coming Soon</div>} />
+          </Route>
+
+          <Route path="*" element={<div className="p-20 text-center text-slate-500 font-bold">404 - Not Found</div>} />
+        </Route>
+      </Routes>
+    </ToastProvider>
   )
 }
 
