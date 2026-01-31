@@ -7,6 +7,8 @@ import LoginPage from './pages/Auth/LoginPage';
 import SignupPage from './pages/Auth/SignupPage';
 import CheckoutPage from './pages/CheckoutPage';
 import MyBookingsPage from './pages/MyBookingsPage';
+import ChatPage from './pages/ChatPage';
+import PublicGamesPage from './pages/PublicGamesPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import DashboardLayout from './layout/DashboardLayout';
 import PlayerDashboard from './pages/Dashboard/PlayerDashboard';
@@ -30,6 +32,8 @@ function App() {
           <Route path="/booking/:id" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
           <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
           <Route path="/my-bookings" element={<ProtectedRoute><MyBookingsPage /></ProtectedRoute>} />
+          <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+          <Route path="/play" element={<PublicGamesPage />} />
           <Route path="/auth/login" element={<LoginPage />} />
           <Route path="/auth/signup" element={<SignupPage />} />
 

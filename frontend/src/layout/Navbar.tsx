@@ -1,4 +1,4 @@
-import { Search, User, Heart, ShoppingCart } from 'lucide-react';
+import { Search, User, Heart, ShoppingCart, MessageSquare } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { NotificationCenter } from '../components/NotificationCenter';
 
@@ -29,15 +29,15 @@ export function Navbar() {
 
                 {/* Navigation Links - Desktop */}
                 <nav className="hidden lg:flex items-center gap-8">
+                    <Link to="/play" className="text-sm font-bold text-slate-700 hover:text-green-600 transition-colors flex items-center gap-1">
+                        Play
+                    </Link>
                     <Link to="/venues" className="text-sm font-bold text-slate-700 hover:text-primary-600 transition-colors">
-                        Browse Venues
+                        Book
                     </Link>
                     <Link to="/my-bookings" className="text-sm font-bold text-slate-700 hover:text-primary-600 transition-colors">
                         My Bookings
                     </Link>
-                    <a href="#" className="text-sm font-bold text-slate-700 hover:text-primary-600 transition-colors">
-                        How It Works
-                    </a>
                 </nav>
 
                 {/* Search Bar */}
@@ -58,6 +58,9 @@ export function Navbar() {
                     {user ? (
                         <div className="flex items-center gap-4">
                             <NotificationCenter />
+                            <Link to="/chat" className="p-2 text-slate-500 hover:text-letsplay-blue transition-colors relative">
+                                <MessageSquare className="w-6 h-6" />
+                            </Link>
                             <div className="hidden lg:flex flex-col items-end">
                                 <span className="text-sm font-bold text-slate-900">{user.name}</span>
                                 <div className="flex gap-2">
