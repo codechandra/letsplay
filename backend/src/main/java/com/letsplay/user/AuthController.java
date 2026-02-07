@@ -12,9 +12,11 @@ import java.util.Optional;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final com.letsplay.security.JwtUtil jwtUtil;
 
-    public AuthController(UserRepository userRepository) {
+    public AuthController(UserRepository userRepository, com.letsplay.security.JwtUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/login")
@@ -28,8 +30,12 @@ public class AuthController {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            // Return dummy success with user info
-            return ResponseEntity.ok(user);
+            String token = jwtUtil.generateToken(user.getEmail());
+            // Return token and user info
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("token", token);
+            response.put("user", user);
+            return ResponseEntity.ok(response);
         }
 
         return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));

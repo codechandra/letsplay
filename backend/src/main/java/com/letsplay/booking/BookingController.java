@@ -9,14 +9,23 @@ public class BookingController {
 
     private final BookingService bookingService;
     private final com.letsplay.join.JoinRequestService joinRequestService;
+    private final com.letsplay.user.UserRepository userRepository;
 
-    public BookingController(BookingService bookingService, com.letsplay.join.JoinRequestService joinRequestService) {
+    public BookingController(BookingService bookingService, com.letsplay.join.JoinRequestService joinRequestService,
+            com.letsplay.user.UserRepository userRepository) {
         this.bookingService = bookingService;
         this.joinRequestService = joinRequestService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody Booking booking) {
+    public ResponseEntity<Booking> createBooking(@RequestBody Booking booking, java.security.Principal principal) {
+        if (principal == null) {
+            throw new RuntimeException("User must be logged in");
+        }
+        com.letsplay.user.User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        booking.setUser(user);
         return ResponseEntity.ok(bookingService.createBooking(booking));
     }
 
@@ -38,9 +47,15 @@ public class BookingController {
     }
 
     // Changed to create a request
+    // Changed to create a request
     @PostMapping("/{id}/join")
-    public ResponseEntity<?> joinBooking(@PathVariable Long id, @RequestParam Long userId) {
-        return ResponseEntity.ok(joinRequestService.createRequest(id, userId));
+    public ResponseEntity<?> joinBooking(@PathVariable Long id, java.security.Principal principal) {
+        if (principal == null) {
+            throw new RuntimeException("User must be logged in");
+        }
+        com.letsplay.user.User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(joinRequestService.createRequest(id, user.getId()));
     }
 
     @GetMapping("/{id}/requests")

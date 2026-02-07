@@ -27,8 +27,9 @@ export default function LoginPage() {
 
             if (!res.ok) throw new Error('Invalid credentials');
 
-            const user = await res.json();
-            localStorage.setItem('user', JSON.stringify(user));
+            const data = await res.json();
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
             showToast('Welcome back!', 'success');
             navigate('/');
         } catch (err: any) {
